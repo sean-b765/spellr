@@ -2,25 +2,24 @@
 <template>
   <div class="container">
     <section class="board">
-      <div class="row" v-for="item in board" :key="item.row">
-        <div class="letter" v-for="index in [1,2,3,4,5]" :key="index">
-          <div 
-            v-motion
-            :initial="{
-              opacity: 0,
-              y: 20,
-            }"
-            :enter="{
-              opacity: 1,
-              y: 0,
-              transition: {
-                delay: (item.row + index) * 50,
-                duration: 250,
-              }
-            }"
-            class="letter__container" v-bind:class="{ correct: item.indices[index] === 'correct', 'in-word': item.indices[index] === 'in-word' }">
-            <div class="key" v-if="item.word[index-1] !== ''">{{item.word[index-1]}}</div>
-          </div>
+      <div class="row" v-for="row in board" :key="row.row">
+        <div v-motion="`container-${row.row}${index}`"
+          v-for="index in [1,2,3,4,5]" 
+          :key="index"
+          :initial="{
+            opacity: 0,
+            y: 20,
+          }"
+          :enter="{
+            opacity: 1,
+            y: 0,
+            transition: {
+              delay: (row.row + index) * 50,
+              duration: 250,
+            }
+          }"
+          class="letter">
+          <Letter :char="row.word[index-1]" :motionId="`${row.row}${index-1}`" :status="row.indices[index]" :index="index-1" />
         </div>
       </div>
     </section>
@@ -31,13 +30,14 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import Keyboard from './Keyboard.vue'
+import Letter from './Letter.vue'
 
 export default defineComponent({
   name: "Board",
   components: {
-    Keyboard,
+    Keyboard, Letter
   },
-  props: ["addWord", "kbLine1", "kbLine2", "kbLine3", "letterLocations", "correctLetters", "closeLetters"],
+  props: ["addWord", "correctLetters", "closeLetters"],
   data() {
     return {
       board: [
@@ -101,6 +101,8 @@ export default defineComponent({
     }
   },
   mounted() {
+    console.log(this.board);
+    
     window.addEventListener('keydown', (e: any) => {
       if (e.key === "Backspace") this.backspace()
       if (e.key === "Enter") this.enter()
@@ -142,30 +144,9 @@ export default defineComponent({
     height: clamp(3rem, 5rem, 8vw);
     font-size: clamp(1rem, 1.8rem, 7vw);
     margin: 0.25rem;
-    border-radius: .5rem;
     color: rgb(241, 232, 241);
+    overflow: hidden;
     font-family: 'Roboto Mono', monospace;
-  }
-  .board .row .letter .letter__container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background: rgb(49, 49, 49);
   }
-  .board .row .letter__container.correct {
-    background: rgb(105, 184, 98);
-  }
-  .board .row .letter__container.in-word {
-    background: rgb(211, 208, 65);
-    color: rgb(31, 30, 30);
-  }
-
-  .board .row .key {
-    position: absolute;
-    color: inherit;
-  }
-</style>>
+</style>

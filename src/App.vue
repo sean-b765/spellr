@@ -1,5 +1,5 @@
 <template>
-  <Board :addWord="addWord" :closeLetters="closeLetters" :correctLetters="correctLetters" :letterLocations="letterLocations" />
+  <Board :addWord="addWord" :closeLetters="closeLetters" :correctLetters="correctLetters" />
 </template>
 
 <script lang="ts">
@@ -39,7 +39,7 @@ export default defineComponent({
       } = {1: "", 2: "", 3: "", 4: "", 5: ""}
 
       // Iterate; check if the letter is in the correct place,
-      //  if it's not, check that it's in the word as well
+      //  if it's not, check that it's in the word at any place
       for (let i = 0; i < this.word.length; i++) {
         if (this.word[i] === word[i]) {
           this.letterLocations[i+1] = this.word[i]
@@ -60,7 +60,7 @@ export default defineComponent({
       return {indices, status: false}
     },
     addWord(word: string) {
-      if (!this.wordList.includes(word)) return {added: false, highlightedIndices: this.letterLocations}
+      if (!this.wordList.includes(word)) return {added: false, highlightedIndices: null}
 
       const {status, indices} = this.checkWord(word)
 
