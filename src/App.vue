@@ -1,5 +1,5 @@
 <template>
-  <Board :addWord="addWord" :closeLetters="closeLetters" :correctLetters="correctLetters" />
+  <Board :reset="reset" :addWord="addWord" :closeLetters="closeLetters" :correctLetters="correctLetters" :guessedLetters="guessedLetters" />
 </template>
 
 <script lang="ts">
@@ -15,21 +15,12 @@ export default defineComponent({
   },
   data() {
     return {
-      status: "",
+      status: "playing",
       wordList: [] as Array<string>,
       word: "",
       correctLetters: [] as Array<string>,
       closeLetters: [] as Array<string>,
-      letterLocations: {
-        1: "",
-        2: "",
-        3: "",
-        4: "",
-        5: ""
-      } as {
-        [key: number]: string
-      },
-      
+      guessedLetters: [] as Array<string>,
     }
   },
   methods: {
@@ -41,12 +32,16 @@ export default defineComponent({
       // Iterate; check if the letter is in the correct place,
       //  if it's not, check that it's in the word at any place
       for (let i = 0; i < this.word.length; i++) {
+        // First check that the letter isn't in the word
+        if (!this.word.includes(word[i])) this.guessedLetters.push(word[i])
+
         if (this.word[i] === word[i]) {
-          this.letterLocations[i+1] = this.word[i]
+          // The letter is correct
           indices[i + 1] = "correct"
 
           if (!this.correctLetters.includes(word[i])) this.correctLetters.push(word[i])
         } else if (this.word.includes(word[i])) {
+          // The letter is in the word
           indices[i + 1] = "in-word"
 
           if (this.correctLetters.includes(word[i])) continue
@@ -55,22 +50,32 @@ export default defineComponent({
         }
       }
 
-      if (this.word === word) return { status: true, indices }
+      if (this.word === word) return { win: true, indices }
 
-      return {indices, status: false}
+      return { indices, win: false }
     },
     addWord(word: string) {
       if (!this.wordList.includes(word)) return {added: false, highlightedIndices: null}
 
-      const {status, indices} = this.checkWord(word)
+      const { win, indices } = this.checkWord(word)
 
-      if (status) {
+      if (win) {
+        this.status = 'win'
         alert('You Win!')
       }
 
       this.wordList.push(word)
       return { added: true, indices }
     },
+    reset() {
+      this.status = ''
+
+      const randomIdx = Number(Number(Math.random() * selectWords.length - 1).toFixed(0))
+      this.word = selectWords[randomIdx];
+      this.correctLetters = []
+      this.closeLetters = []
+      this.guessedLetters = []
+    }
   },
   mounted() {
     // set the word list,

@@ -1,10 +1,13 @@
 /* eslint-disable */
 <template>
   <div class="container">
+    <div class="controls">
+      <button @click="this.resetBoard">Reset</button>
+    </div>
     <section class="board">
       <div class="row" v-for="row in board" :key="row.row">
         <div v-motion="`container-${row.row}${index}`"
-          v-for="index in [1,2,3,4,5]" 
+          v-for="index in [0,1,2,3,4]" 
           :key="index"
           :initial="{
             opacity: 0,
@@ -19,64 +22,79 @@
             }
           }"
           class="letter">
-          <Letter :char="row.word[index-1]" :motionId="`${row.row}${index-1}`" :status="row.indices[index]" :index="index-1" />
+          <Cell :isDone="row.row <= currentRow" :char="row.word[index]" :motionId="`${row.row}${index}`" :status="row.indices[index + 1]" :index="index" />
         </div>
       </div>
     </section>
-    <Keyboard :addLetter="addLetter" :backspace="backspace" :enter="enter" :closeLetters="$props.closeLetters" :correctLetters="$props.correctLetters" />
+    <Keyboard :addLetter="addLetter" :backspace="backspace" :enter="enter" :closeLetters="$props.closeLetters" :correctLetters="$props.correctLetters" :guessedLetters="guessedLetters" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import Keyboard from './Keyboard.vue'
-import Letter from './Letter.vue'
+import Cell from './Cell.vue'
+
+const defaultBoard = [
+  {
+    row: 1,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  },
+  {
+    row: 2,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  },
+  {
+    row: 3,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  },
+  {
+    row: 4,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  },
+  {
+    row: 5,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  },
+  {
+    row: 6,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  }
+]
 
 export default defineComponent({
   name: "Board",
   components: {
-    Keyboard, Letter
+    Keyboard, Cell
   },
-  props: ["addWord", "correctLetters", "closeLetters"],
+  props: {
+    addWord: { type: Function, required: true },
+    reset: { type: Function, required: true },
+    correctLetters: { type: Array },
+    closeLetters: { type: Array },
+    guessedLetters: { type: Array }
+  },
   data() {
     return {
-      board: [
-        {
-          row: 1,
-          word: '',
-          indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-            [key: number]: string
-          }
-        },
-        {
-          row: 2,
-          word: '',
-          indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-            [key: number]: string
-          }
-        },
-        {
-          row: 3,
-          word: '',
-          indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-            [key: number]: string
-          }
-        },
-        {
-          row: 4,
-          word: '',
-          indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-            [key: number]: string
-          }
-        },
-        {
-          row: 5,
-          word: '',
-          indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-            [key: number]: string
-          }
-        }
-      ],
+      board: defaultBoard,
       currentRow: 0
     }
   },
@@ -85,9 +103,22 @@ export default defineComponent({
       if (this.board[this.currentRow]?.word.length >= 5) return
 
       this.board[this.currentRow].word = `${this.board[this.currentRow].word}${e}`
+
+      window.focus()
     },
     backspace() {
       this.board[this.currentRow].word = this.board[this.currentRow].word.substring(0, this.board[this.currentRow].word.length - 1)
+    },
+    resetBoard() {
+      this.$props.reset()
+      this.board = this.board.map((row) => {
+        return {
+          word: row.word = "",
+          row: row.row,
+          indices: { 1: "", 2: "", 3: "", 4: "", 5: "" }
+        }
+      })
+      this.currentRow = 0
     },
     enter() {
       const { added, indices } = this.$props.addWord(this.board[this.currentRow].word)
@@ -98,7 +129,7 @@ export default defineComponent({
       } else {
         this.board[this.currentRow].word = ""
       }
-    }
+    },
   },
   mounted() {
     console.log(this.board);
@@ -115,6 +146,20 @@ export default defineComponent({
 </script>
 
 <style scoped>
+  .controls {
+    margin-top: 2rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  button {
+    border: 2px solid rgb(179, 32, 32);
+    background: rgb(207, 66, 66);
+    padding: 0.5rem 1rem;
+    color: white;
+    font-family: 'Roboto Mono', monospace;
+  }
   .container {
     display: flex;
     align-items: center;

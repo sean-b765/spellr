@@ -16,13 +16,14 @@
       }"
       :leave="{
         opacity: 0,
-        y: -20,
+        y: -5,
         transition: {
-          duration: 150,
+          duration: 250,
+          delay: isDone ? Number(motionId.substring(0, 1)) * 150 : 0
         }
       }"
-      class="letter__container" v-bind:class="{ correct: status === 'correct', 'in-word': status === 'in-word' }">
-      <div class="key" v-if="char !== ''">{{char}}</div>
+      class="letter__container">
+      <Char :vMotionId="`${motionId}char`" :char="char" :isDone="isDone" :status="status" />
     </div>
   </transition>
 </template>
@@ -30,9 +31,18 @@
 <script>
 import { defineComponent } from '@vue/runtime-core'
 import { useMotions } from '@vueuse/motion'
+import Char from './Char.vue'
 
 export default defineComponent({
-  props: ["status", "motionId", "char"],
+  components: {
+    Char
+  },
+  props: {
+    status: { type: String },
+    motionId: { type: String },
+    char: { type: String },
+    isDone: { type: Boolean }
+  },
   setup() {
     const motions = useMotions()
 
@@ -51,16 +61,5 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   transition: background 0.3s ease-in-out;
-}
-.letter__container.correct {
-  background: rgb(105, 184, 98);
-}
-.letter__container.in-word {
-  background: rgb(211, 208, 65);
-  color: rgb(31, 30, 30);
-}
-.key {
-  position: absolute;
-  color: inherit;
 }
 </style>

@@ -6,26 +6,38 @@
     }}">
       <div>
         <button 
-          v-bind:class="{ correct: $props.correctLetters.includes(key), 'in-word': $props.closeLetters.includes(key) && !$props.correctLetters.includes(key) }" 
+          v-bind:class="{ 
+            correct: correctLetters.includes(key), 
+            'in-word': closeLetters.includes(key) && ! correctLetters.includes(key),
+            guessed: guessedLetters.includes(key)
+          }" 
           v-for="key in kbLine1" 
           :key="key" 
-          @click="$props.addLetter(key)">{{key}}</button>
+          @click=" addLetter(key)">{{key}}</button>
       </div>
       <div>
         <button 
-          v-bind:class="{ correct: $props.correctLetters.includes(key), 'in-word': $props.closeLetters.includes(key) && !$props.correctLetters.includes(key) }" 
+          v-bind:class="{ 
+            correct: correctLetters.includes(key), 
+            'in-word': closeLetters.includes(key) && ! correctLetters.includes(key),
+            guessed: guessedLetters.includes(key)
+          }" 
           v-for="key in kbLine2" 
           :key="key" 
-          @click="$props.addLetter(key)">{{key}}</button>
+          @click=" addLetter(key)">{{key}}</button>
       </div>
       <div>
-        <button class="enter" @click="$props.enter">enter</button>
+        <button class="enter" @click=" enter">enter</button>
         <button 
-          v-bind:class="{ correct: $props.correctLetters.includes(key), 'in-word': $props.closeLetters.includes(key) && !$props.correctLetters.includes(key) }" 
+          v-bind:class="{ 
+            correct: correctLetters.includes(key), 
+            'in-word': closeLetters.includes(key) && ! correctLetters.includes(key),
+            guessed: guessedLetters.includes(key)
+          }" 
           v-for="key in kbLine3" 
           :key="key" 
-          @click="$props.addLetter(key)">{{key}}</button>
-        <button class="bksp" @click="$props.backspace">&lt;&lt;</button>
+          @click=" addLetter(key)">{{key}}</button>
+        <button class="bksp" @click=" backspace">&lt;&lt;</button>
       </div>
     </section>
 </template>
@@ -35,7 +47,7 @@ import { defineComponent } from "@vue/runtime-core";
 
 export default defineComponent({
   name: 'Keyboard',
-  props: ["enter", "backspace", "addLetter", "correctLetters", "closeLetters"],
+  props: ["enter", "backspace", "addLetter", "correctLetters", "closeLetters", "guessedLetters"],
   data() {
     return {
       kbLine1: ["q","w","e","r","t","y","u","i","o","p"],
@@ -73,13 +85,17 @@ export default defineComponent({
   background: #444;
   color: white;
   border: none;
+  transition: all 0.3s cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 .keyboard div button.correct {
-  background: rgb(89, 139, 85) !important;
+  background: rgb(105, 184, 98) !important;
 }
 .keyboard div button.in-word {
   background: rgb(211, 208, 65);
   color: rgb(31, 30, 30);
+}
+.keyboard div button.guessed {
+  background: rgb(117, 117, 117);
 }
 .keyboard div .enter, .keyboard div .bksp {
   width: clamp(3rem, 4.5rem, 8vw);
