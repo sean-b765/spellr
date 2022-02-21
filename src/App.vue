@@ -1,5 +1,18 @@
 <template>
-  <Board :reset="reset" :addWord="addWord" :closeLetters="closeLetters" :correctLetters="correctLetters" :guessedLetters="guessedLetters" />
+  <Status :status="status" :duration="duration" :word="word" :resetStatus="resetStatus" />
+  <div class="duration">{{duration}}</div>
+  <Menu :pastGames="sortHistory()" />
+  <Board 
+    :addLetter="addLetter" 
+    :backspace="backspace" 
+    :board="board" 
+    :currentRow="currentRow" 
+    :enter="enter" 
+    :reset="reset" 
+    :addWord="addWord" 
+    :closeLetters="closeLetters" 
+    :correctLetters="correctLetters" 
+    :guessedLetters="guessedLetters" />
 </template>
 
 <script lang="ts">
@@ -7,23 +20,100 @@ import { defineComponent } from "vue";
 import Board from "./components/Board.vue"
 import words from "./words"
 import selectWords from "./selectWords"
+import Status from './components/Status.vue'
+import { Game, BoardType } from './types/index'
+import moment, { Duration } from 'moment'
+import Menu from './components/Menu.vue'
+
+const defaultBoard = [
+  {
+    row: 1,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  },
+  {
+    row: 2,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  },
+  {
+    row: 3,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  },
+  {
+    row: 4,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  },
+  {
+    row: 5,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  },
+  {
+    row: 6,
+    word: '',
+    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
+      [key: number]: string
+    }
+  }
+] as BoardType
 
 export default defineComponent({
   name: "App",
   components: {
-    Board
+    Board, Status, Menu
   },
   data() {
     return {
-      status: "playing",
+      startTime: moment(),
+      finishTime: moment().subtract(1, "day"),
+      duration: "",
+      finished: false,
       wordList: [] as Array<string>,
       word: "",
       correctLetters: [] as Array<string>,
       closeLetters: [] as Array<string>,
       guessedLetters: [] as Array<string>,
+      board: defaultBoard,
+      currentRow: 0,
+      status: "",
+      history: JSON.parse(localStorage.getItem('spellr-history') || '[]') as Array<Game>
     }
   },
   methods: {
+    sortHistory() {
+      return this.history.sort((ob1, ob2) => moment(ob2.datePlayed, 'MMM D YYYY - HH:mm').diff(moment(ob1.datePlayed, 'MMM D YYYY - HH:mm')))
+    },
+    addLetter(e: any) {
+      if (this.board[this.currentRow]?.word.length >= 5) return
+
+      this.board[this.currentRow].word = `${this.board[this.currentRow].word}${e}`
+    },
+    backspace() {
+      this.board[this.currentRow].word = this.board[this.currentRow]?.word.substring(0, this.board[this.currentRow]?.word.length - 1)
+    },
+    enter() {
+      const { added, indices } = this.addWord(this.board[this.currentRow]?.word)
+      
+      if (added) {
+        this.board[this.currentRow].indices = indices
+        this.currentRow = this.currentRow + 1
+      } else {
+        this.board[this.currentRow].word = ""
+      }
+    },
     checkWord(word: string) {
       const indices: {
         [key: number]: string
@@ -55,26 +145,65 @@ export default defineComponent({
       return { indices, win: false }
     },
     addWord(word: string) {
-      if (!this.wordList.includes(word)) return {added: false, highlightedIndices: null}
+      if (!this.wordList.includes(word)) return {added: false, indices: {1:"",2:"",3:"",4:"",5:""}}
 
       const { win, indices } = this.checkWord(word)
 
       if (win) {
-        this.status = 'win'
-        alert('You Win!')
+        this.status = "win"
+        this.wordList.push(word)
+        this.gameEndEvent(true)
+        return { added: true, indices }
+      }
+      if (this.currentRow >= 5) {
+        this.status = "loss"
+        this.wordList.push(word)
+        this.gameEndEvent(false)
+        return { added: true, indices }
       }
 
       this.wordList.push(word)
       return { added: true, indices }
     },
+    gameEndEvent(win: boolean) {
+      this.finishTime = moment()
+
+      this.history.push({
+        win: win,
+        datePlayed: moment().format('MMM D YYYY - HH:mm'),
+        word: this.word,
+        guess: this.currentRow,
+        time: this.duration,
+        board: this.board,
+      })
+      this.finished = true
+    },
+    resetStatus() {
+      this.status = ""
+    },
+    humaniseDuration(dur: Duration) {
+      const duration = `${dur.hours() >= 10 ? dur.hours() : `0${dur.hours()}`}:${dur.minutes() >= 10 ? dur.minutes() : `0${dur.minutes()}`}:${dur.seconds() >= 10 ? dur.seconds() : `0${dur.seconds()}`}:${dur.milliseconds() >= 10 ? dur.milliseconds() >= 100 ? dur.milliseconds() : `0${dur.milliseconds()}` : `00${dur.milliseconds()}`}`
+      return duration
+    },
     reset() {
-      this.status = ''
+      this.board = this.board.map((row) => {
+        return {
+          word: row.word = "",
+          row: row.row,
+          indices: { 1: "", 2: "", 3: "", 4: "", 5: "" }
+        }
+      })
+      this.currentRow = 0
+      this.status = ""
+      this.finished = false
 
       const randomIdx = Number(Number(Math.random() * selectWords.length - 1).toFixed(0))
       this.word = selectWords[randomIdx];
       this.correctLetters = []
       this.closeLetters = []
       this.guessedLetters = []
+      this.startTime = moment()
+      this.finishTime = moment().subtract(1, "day")
     }
   },
   mounted() {
@@ -85,30 +214,50 @@ export default defineComponent({
 
     this.word = selectWords[randomIdx];
     console.log(this.word);
+
+    setInterval(() => {
+      if (this.finished) return
+      this.duration = this.humaniseDuration(moment.duration(moment().diff(this.startTime)))
+    }, 10)
+  },
+  watch: {
+    // watch for changes in history - set localStorage
+    history: {
+      handler: function(oldVal, newVal) {
+        console.log(oldVal, newVal);
+        localStorage.setItem('spellr-history', JSON.stringify(this.history))
+      },
+      deep: true,
+      immediate: true
+    }
   }
 });
 </script>
 
 <style>
 body {
-  margin: 0;
+  overflow: hidden;
 }
 * {
-  box-sizing: content-box;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 #app {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: column;
   position: relative;
   width: 100%;
-  margin: 0;
-  padding: 2rem auto;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-family: 'Roboto Mono', monospace;
+}
+.duration {
+  margin-top: 1rem;
+  font-size: 1.4rem;
 }
 </style>
