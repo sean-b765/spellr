@@ -90,7 +90,7 @@ export default defineComponent({
     width: clamp(3rem, 5rem, 8vw);
     height: clamp(3rem, 5rem, 8vw);
     font-size: clamp(1rem, 1.8rem, 7vw);
-    margin: 0.25rem;
+    margin: 0.15rem;
     color: rgb(241, 232, 241);
     overflow: hidden;
     font-family: 'Roboto Mono', monospace;
