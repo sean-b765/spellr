@@ -1,6 +1,12 @@
 <template>
   <Status :status="status" :duration="duration" :word="word" :resetStatus="resetStatus" />
-  <div class="duration">{{duration}}</div>
+  <div class="controls">
+    <div class="duration">{{duration}}</div>
+    <button class='reset' @click="reset">
+      <svg stroke-width="0" viewBox="0 0 512 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32" d="M320 146s24.36-12-64-12a160 160 0 10160 160"></path><path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M256 58l80 80-80 80"></path></svg>
+    </button>
+  </div>
+  
   <Menu :pastGames="sortHistory()" />
   <Board 
     :addLetter="addLetter" 
@@ -8,7 +14,6 @@
     :board="board" 
     :currentRow="currentRow" 
     :enter="enter" 
-    :reset="reset" 
     :addWord="addWord" 
     :closeLetters="closeLetters" 
     :correctLetters="correctLetters" 
@@ -235,6 +240,36 @@ export default defineComponent({
 </script>
 
 <style>
+.controls {
+  position: relative;
+  padding: 1rem 1rem 0 1rem;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.reset {
+  background: rgb(207, 66, 66);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  color: white;
+  font-family: 'Roboto Mono', monospace;
+  cursor: pointer;
+  margin-left: 1rem;
+}
+.reset svg {
+  fill: white;
+  stroke: white;
+  font-size: 1rem;
+}
+.duration {
+  font-size: 1.4rem;
+}
+
 body {
   overflow: hidden;
 }
@@ -256,8 +291,5 @@ body {
   color: #2c3e50;
   font-family: 'Roboto Mono', monospace;
 }
-.duration {
-  margin-top: 1rem;
-  font-size: 1.4rem;
-}
+
 </style>

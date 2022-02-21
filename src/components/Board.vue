@@ -1,9 +1,6 @@
 /* eslint-disable */
 <template>
   <div class="container">
-    <div class="controls">
-      <button @click="reset">Reset</button>
-    </div>
     <section class="board">
       <div class="row" v-for="row in board" :key="row.row">
         <div v-motion="`container-${row.row}${index}`"
@@ -43,7 +40,6 @@ export default defineComponent({
   props: {
     addWord: { type: Function, required: true },
     addLetter: { type: Function, required: true },
-    reset: { type: Function, required: true },
     enter: { type: Function, required: true },
     backspace: { type: Function, required: true },
     correctLetters: { type: Array },
@@ -65,22 +61,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-  .controls {
-    position: relative;
-    padding: 1rem 2rem 0 2rem;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-  button {
-    border: 2px solid rgb(179, 32, 32);
-    background: rgb(207, 66, 66);
-    padding: 0.5rem 1rem;
-    color: white;
-    font-family: 'Roboto Mono', monospace;
-    cursor: pointer;
-  }
+  
   .container {
     position: relative;
     left: 0;
