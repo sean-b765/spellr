@@ -79,8 +79,8 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
-  padding: clamp(0.2rem, 2rem, 2vw);
-  margin: clamp(0.1rem, 0.25rem, .7vw);
+  padding: clamp(0.3rem, 2rem, 2vw);
+  margin: clamp(0.1rem, 0.25rem, .6vw);
   font-family: 'Roboto Mono', monospace;
   background: #444;
   color: white;

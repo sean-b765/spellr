@@ -61,7 +61,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-  
   .container {
     position: relative;
     left: 0;
@@ -75,7 +74,7 @@ export default defineComponent({
     align-items: flex-start;
     justify-content: flex-start;
     flex-direction: column;
-    margin: 1rem 0 2rem 0;
+    margin: 1rem 0 1rem 0;
   }
   .board .row {
     position: relative;
