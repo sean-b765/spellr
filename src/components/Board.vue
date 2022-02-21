@@ -2,7 +2,7 @@
 <template>
   <div class="container">
     <div class="controls">
-      <button @click="this.resetBoard">Reset</button>
+      <button @click="reset">Reset</button>
     </div>
     <section class="board">
       <div class="row" v-for="row in board" :key="row.row">
@@ -35,51 +35,6 @@ import { defineComponent } from "vue";
 import Keyboard from './Keyboard.vue'
 import Cell from './Cell.vue'
 
-const defaultBoard = [
-  {
-    row: 1,
-    word: '',
-    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-      [key: number]: string
-    }
-  },
-  {
-    row: 2,
-    word: '',
-    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-      [key: number]: string
-    }
-  },
-  {
-    row: 3,
-    word: '',
-    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-      [key: number]: string
-    }
-  },
-  {
-    row: 4,
-    word: '',
-    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-      [key: number]: string
-    }
-  },
-  {
-    row: 5,
-    word: '',
-    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-      [key: number]: string
-    }
-  },
-  {
-    row: 6,
-    word: '',
-    indices: {1: "", 2: "", 3: "", 4: "", 5: ""} as {
-      [key: number]: string
-    }
-  }
-]
-
 export default defineComponent({
   name: "Board",
   components: {
@@ -87,59 +42,23 @@ export default defineComponent({
   },
   props: {
     addWord: { type: Function, required: true },
+    addLetter: { type: Function, required: true },
     reset: { type: Function, required: true },
+    enter: { type: Function, required: true },
+    backspace: { type: Function, required: true },
     correctLetters: { type: Array },
     closeLetters: { type: Array },
-    guessedLetters: { type: Array }
+    guessedLetters: { type: Array },
+    board: { type: Object, required: true },
+    currentRow: { type: Number, required: true },
   },
-  data() {
-    return {
-      board: defaultBoard,
-      currentRow: 0
-    }
-  },
-  methods: {
-    addLetter(e: any) {
-      if (this.board[this.currentRow]?.word.length >= 5) return
-
-      this.board[this.currentRow].word = `${this.board[this.currentRow].word}${e}`
-
-      window.focus()
-    },
-    backspace() {
-      this.board[this.currentRow].word = this.board[this.currentRow].word.substring(0, this.board[this.currentRow].word.length - 1)
-    },
-    resetBoard() {
-      this.$props.reset()
-      this.board = this.board.map((row) => {
-        return {
-          word: row.word = "",
-          row: row.row,
-          indices: { 1: "", 2: "", 3: "", 4: "", 5: "" }
-        }
-      })
-      this.currentRow = 0
-    },
-    enter() {
-      const { added, indices } = this.$props.addWord(this.board[this.currentRow].word)
-      
-      if (added) {
-        this.board[this.currentRow].indices = indices
-        this.currentRow = this.currentRow + 1
-      } else {
-        this.board[this.currentRow].word = ""
-      }
-    },
-  },
-  mounted() {
-    console.log(this.board);
-    
+  mounted() {    
     window.addEventListener('keydown', (e: any) => {
-      if (e.key === "Backspace") this.backspace()
-      if (e.key === "Enter") this.enter()
+      if (e.key === "Backspace") this.$props.backspace()
+      if (e.key === "Enter") this.$props.enter()
       
       if (!'qwertyuiopasdfghjklzxcvbnm'.includes(e.key)) return
-      this.addLetter(e.key)
+      this.$props.addLetter(e.key)
     })
   }
 });
@@ -147,11 +66,12 @@ export default defineComponent({
 
 <style scoped>
   .controls {
-    margin-top: 2rem;
+    position: relative;
+    padding: 1rem 2rem 0 2rem;
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
   }
   button {
     border: 2px solid rgb(179, 32, 32);
@@ -159,8 +79,11 @@ export default defineComponent({
     padding: 0.5rem 1rem;
     color: white;
     font-family: 'Roboto Mono', monospace;
+    cursor: pointer;
   }
   .container {
+    position: relative;
+    left: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -171,8 +94,7 @@ export default defineComponent({
     align-items: flex-start;
     justify-content: flex-start;
     flex-direction: column;
-    max-width: calc(5 * 5rem);
-    margin: 2rem 0;
+    margin: 1rem 0 2rem 0;
   }
   .board .row {
     position: relative;

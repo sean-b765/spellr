@@ -8,27 +8,27 @@
       v-if="isDone"
       v-motion="vMotionId"
       :initial="{
-        opacity: 0,
-        scale: 0,
-        rotateX: -270,
-        y: -20
+        opacity: 1,
+        rotateY: -90,
+        scaleX: 0
       }"
       :enter="{
         opacity: 1,
-        scale: 1,
-        rotateX: 0,
-        y: 0,
+        rotateY: 0,
+        scaleX: 1,
         transition: {
-          duration: 600,
+          duration: 300,
+          delay: Number(vMotionId?.substring(1,2)) * 200
         }
       }"
       :leave="{
         scale: 0,
         opacity: 0,
-        y: 0,
-        rotateX: 0,
+        x: 0,
+        rotateY: 0,
         transition: {
-          duration: 50,
+          duration: 200,
+          delay: Number(vMotionId?.substring(1,2)) * 200
         }
       }">
       {{char}}
@@ -56,15 +56,15 @@ export default {
   align-items: center;
   justify-content: center;
   color: inherit;
-  perspective: 700px;
+  perspective: 70px;
 }
 .key div {
   background: rgb(49, 49, 49);
   top: 0;
   left: 0;
   position: absolute;
-  width: calc(100% - 10px);
-  height: calc(100% - 10px);
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
