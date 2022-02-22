@@ -1,3 +1,4 @@
+/* eslint-disable */
 <template>
   <Status :status="status" :duration="duration" :word="word" :resetStatus="resetStatus" />
   <div class="controls">
@@ -82,6 +83,11 @@ export default defineComponent({
   },
   data() {
     return {
+      fxWin: new Audio('./game_win.mp3'),
+      fxLoss: new Audio('./game_lose.mp3'),
+      fxType: new Audio('./type.mp3'),
+      fxCorrect: new Audio('./correct.mp3'),
+      fxWrong: new Audio('./wrong.mp3'),
       startTime: moment(),
       finishTime: moment().subtract(1, "day"),
       duration: "",
@@ -105,6 +111,8 @@ export default defineComponent({
       if (this.board[this.currentRow]?.word.length >= 5) return
 
       this.board[this.currentRow].word = `${this.board[this.currentRow].word}${e}`
+
+      this.fxType.play()
     },
     backspace() {
       this.board[this.currentRow].word = this.board[this.currentRow]?.word.substring(0, this.board[this.currentRow]?.word.length - 1)
@@ -150,7 +158,11 @@ export default defineComponent({
       return { indices, win: false }
     },
     addWord(word: string) {
-      if (!this.wordList.includes(word)) return {added: false, indices: {1:"",2:"",3:"",4:"",5:""}}
+      if (!this.wordList.includes(word)) {
+        // incorrect guess
+        this.fxWrong.play()
+        return { added: false, indices: {1:"",2:"",3:"",4:"",5:""} }
+      }
 
       const { win, indices } = this.checkWord(word)
 
@@ -167,10 +179,14 @@ export default defineComponent({
         return { added: true, indices }
       }
 
+      this.fxCorrect.play()
       this.wordList.push(word)
       return { added: true, indices }
     },
     gameEndEvent(win: boolean) {
+      if (win) this.fxWin.play()
+      else this.fxLoss.play()
+
       this.finishTime = moment()
 
       this.history.push({
@@ -219,6 +235,11 @@ export default defineComponent({
 
     this.word = selectWords[randomIdx];
     console.log(this.word);
+
+    this.fxWin.volume = 0.5
+    this.fxLoss.volume = 0.5
+    this.fxCorrect.volume = .5
+    this.fxWrong.volume = .25
 
     setInterval(() => {
       if (this.finished) return
