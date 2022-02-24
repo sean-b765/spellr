@@ -176,9 +176,8 @@ export default defineComponent({
 
         // There are correct appearances further ahead in the word, so we should continue
         if (futureCorrectAppearances >= totalAppearances) continue
-
-        // Ensure duplicates are accounted for
         if (priorAppearances >= totalAppearances) continue
+        if (priorAppearances + futureCorrectAppearances >= totalAppearances) continue
 
         if (!this.closeLetters.includes(letter)) this.closeLetters.push(letter)
 
