@@ -127,33 +127,67 @@ export default defineComponent({
         this.board[this.currentRow].word = ""
       }
     },
-    checkWord(word: string) {
+    checkWord(guessedWord: string) {
+      // The indices in this dictionary correspond to the status of each letter being "correct" or "close"
+      //  e.g. for the word "apple", with a guess of "opens"
+      // { 1: "", 2: "correct", 3: "in-word", 4: "", 5: "" }
       const indices: {
         [key: number]: string
       } = {1: "", 2: "", 3: "", 4: "", 5: ""}
 
-      // Iterate; check if the letter is in the correct place,
-      //  if it's not, check that it's in the word at any place
-      for (let i = 0; i < this.word.length; i++) {
-        // First check that the letter isn't in the word
-        if (!this.word.includes(word[i])) this.guessedLetters.push(word[i])
+      // Keep a string of the matching characters so we can keep track of the prior appearances while iterating
+      let matchingChars = ''
 
-        if (this.word[i] === word[i]) {
-          // The letter is correct
+      for (let i = 0; i < this.word.length; i++) {
+        const letter = guessedWord[i]
+
+        const rgx = new RegExp(`${letter}`, "g")
+        // Need to know the total appearances of the letter in the word
+        const totalAppearances = (this.word.match(rgx) || []).length
+        // Also need to know all prior appearances of the letter in the word, 
+        //  so we don't mistakenly tell the user that a duplicate letter exists
+        const priorAppearances = (matchingChars.match(rgx) || []).length
+
+        if (!this.word.includes(letter)) {
+          this.guessedLetters.push(letter)
+          // can continue the loop without checking correctness of the letter
+          continue
+        }
+
+        // The letter is correct
+        if (this.word[i] === guessedWord[i]) {
           indices[i + 1] = "correct"
 
-          if (!this.correctLetters.includes(word[i])) this.correctLetters.push(word[i])
-        } else if (this.word.includes(word[i])) {
-          // The letter is in the word
-          indices[i + 1] = "in-word"
+          if (!this.correctLetters.includes(letter)) {
+            this.correctLetters.push(letter)
+          }
 
-          if (this.correctLetters.includes(word[i])) continue
-
-          if (!this.closeLetters.includes(word[i])) this.closeLetters.push(word[i])
+          matchingChars = matchingChars + letter
+          continue
         }
-      }
 
-      if (this.word === word) return { win: true, indices }
+        // The letter is included in the word
+
+        // Look ahead... If there is a correct appearance further in the word, we need to know
+        let futureCorrectAppearances = 0
+        for (let j = i; j < this.word.length; j++) {
+          if (this.word[j] === guessedWord[j] && this.word[j] === letter) futureCorrectAppearances++
+        }
+
+        // There are correct appearances further ahead in the word, so we should continue
+        if (futureCorrectAppearances >= totalAppearances) continue
+
+        // Ensure duplicates are accounted for
+        if (priorAppearances >= totalAppearances) continue
+
+        if (!this.closeLetters.includes(letter)) this.closeLetters.push(letter)
+
+        indices[i + 1] = "in-word"
+
+        matchingChars = matchingChars + letter
+      }// end for
+
+      if (this.word === guessedWord) return { win: true, indices }
 
       return { indices, win: false }
     },
@@ -250,7 +284,6 @@ export default defineComponent({
     // watch for changes in history - set localStorage
     history: {
       handler: function(oldVal, newVal) {
-        console.log(oldVal, newVal);
         localStorage.setItem('spellr-history', JSON.stringify(this.history))
       },
       deep: true,
