@@ -87,9 +87,9 @@ export default defineComponent({
   }
   .board .row .letter {
     position: relative;
-    width: clamp(3rem, 5rem, 8vw);
-    height: clamp(3rem, 5rem, 8vw);
-    font-size: clamp(1rem, 1.8rem, 7vw);
+    width: clamp(3.5rem, 5vw, 4rem);
+    height: clamp(3.5rem, 5vw, 4rem);
+    font-size: clamp(.5rem, 5vw, 1.4rem);
     margin: 0.15rem;
     color: rgb(241, 232, 241);
     overflow: hidden;
